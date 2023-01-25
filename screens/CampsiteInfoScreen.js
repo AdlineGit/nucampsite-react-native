@@ -1,31 +1,34 @@
-import { FlatList, StyleSheet, Text, View, Button, Modal } from "react-native";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { View, Text, FlatList, StyleSheet, Modal, Button } from "react-native";
+import { Rating, Input } from "react-native-elements";
 import RenderCampsite from "../features/campsites/RenderCampsite";
 import { toggleFavorite } from "../features/favorites/favoritesSlice";
-import { useState } from "react";
-import { Rating, Input } from "react-native-elements";
 import { postComment } from "../features/comments/commentsSlice";
 
 const CampsiteInfoScreen = ({ route }) => {
   const { campsite } = route.params;
-  const comments = useSelector((state) => state.comments);
-  const favorites = useSelector((state) => state.favorites);
-  const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [rating, setRating] = useState(5);
   const [author, setAuthor] = useState("");
   const [text, setText] = useState("");
+  const comments = useSelector((state) => state.comments);
+  const favorites = useSelector((state) => state.favorites);
+
+  const dispatch = useDispatch();
 
   const handleSubmit = () => {
     const newComment = {
-      author,
       rating,
+      author,
       text,
       campsiteId: campsite.id,
     };
+
     dispatch(postComment(newComment));
     setShowModal(!showModal);
   };
+
   const resetForm = () => {
     setRating(5);
     setAuthor("");
@@ -42,6 +45,7 @@ const CampsiteInfoScreen = ({ route }) => {
           style={{ alignItems: "flex-start", paddingVertical: "5%" }}
           readonly
         />
+
         <Text style={{ fontSize: 12 }}>
           {`-- ${item.author}, ${item.date}`}
         </Text>
@@ -64,10 +68,10 @@ const CampsiteInfoScreen = ({ route }) => {
         ListHeaderComponent={
           <>
             <RenderCampsite
-              onShowModal={() => setShowModal(!showModal)}
               campsite={campsite}
               isFavorite={favorites.includes(campsite.id)}
               markFavorite={() => dispatch(toggleFavorite(campsite.id))}
+              onShowModal={() => setShowModal(!showModal)}
             />
             <Text style={styles.commentsTitle}>Comments</Text>
           </>
@@ -85,27 +89,32 @@ const CampsiteInfoScreen = ({ route }) => {
             showRating
             startingValue={rating}
             imageSize={40}
-            onFinishRating={(newrating) => setRating(newrating)}
+            onFinishRating={(rating) => setRating(rating)}
             style={{ paddingVertical: 10 }}
+            type="star"
+            ratingCount={5}
+            fractions={1}
           />
 
           <Input
             placeholder="Author"
             leftIcon={{ name: "user-o", type: "font-awesome" }}
             leftIconContainerStyle={{ paddingRight: 10 }}
-            onChangeText={(auth) => setAuthor(auth)}
+            onChangeText={(author) => setAuthor(author)}
             value={author}
           />
+
           <Input
             placeholder="Comment"
             leftIcon={{ name: "comment-o", type: "font-awesome" }}
-            leftIconContainerStyle={{ padding: 10 }}
-            onChange={(newcomment) => setText(newcomment)}
+            leftIconContainerStyle={{ paddingRight: 10 }}
+            onChangeText={(comment) => setText(comment)}
             value={text}
           />
+
           <View style={{ margin: 10 }}>
             <Button
-              title="submit"
+              title="Submit"
               color="#5637DD"
               onPress={() => {
                 handleSubmit();
@@ -116,12 +125,12 @@ const CampsiteInfoScreen = ({ route }) => {
 
           <View style={{ margin: 10 }}>
             <Button
-              title="Cancel"
               onPress={() => {
                 setShowModal(!showModal);
                 resetForm();
               }}
               color="#808080"
+              title="Cancel"
             />
           </View>
         </View>
